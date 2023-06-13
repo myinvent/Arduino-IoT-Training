@@ -24,31 +24,23 @@ SimpleDHT11 dht11(pinDHT11);
 unsigned long lastMillis = 0;
 
 BLYNK_WRITE(V0) {
-  int value = param.asInt();
-
   pinMode(LED1, OUTPUT);
-  digitalWrite(LED1, value);
+  digitalWrite(LED1, param.asInt());
 }
 
 BLYNK_WRITE(V1) {
-  int value = param.asInt();
-
   pinMode(LED2, OUTPUT);
-  digitalWrite(LED2, value);
+  digitalWrite(LED2, param.asInt());
 }
 
 BLYNK_WRITE(V2) {
-  int value = param.asInt();
-
   pinMode(LED3, OUTPUT);
-  digitalWrite(LED3, value);
+  digitalWrite(LED3, param.asInt());
 }
 
 BLYNK_WRITE(V3) {
-  int value = param.asInt();
-
   pinMode(LED4, OUTPUT);
-  digitalWrite(LED4, value);
+  digitalWrite(LED4, param.asInt());
 }
 
 void setup() {
@@ -57,7 +49,6 @@ void setup() {
 
   Blynk.begin(auth, ssid, pass);
 }
-
 
 void loop() {
   Blynk.run();
