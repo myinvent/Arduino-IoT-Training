@@ -10,8 +10,8 @@
 #include <SimpleDHT.h>
 
 char auth[] = BLYNK_AUTH_TOKEN;
-char ssid[] = "YOUR_SSID";
-char pass[] = "YOUR_PASSWORD";
+char ssid[] = "YOUR_WIFI_SSID";
+char pass[] = "YOUR_WIFI_PASSWORD";
 
 int pinDHT11 = 23;
 SimpleDHT11 dht11(pinDHT11);

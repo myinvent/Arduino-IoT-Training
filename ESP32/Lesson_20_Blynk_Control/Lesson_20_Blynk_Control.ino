@@ -9,8 +9,8 @@
 #include <BlynkSimpleEsp32.h>
 
 char auth[] = BLYNK_AUTH_TOKEN;
-char ssid[] = "YOUR_SSID";
-char pass[] = "YOUR_PASSWORD";
+char ssid[] = "YOUR_WIFI_SSID";
+char pass[] = "YOUR_WIFI_PASSWORD";
 
 
 BLYNK_WRITE(V0) {
