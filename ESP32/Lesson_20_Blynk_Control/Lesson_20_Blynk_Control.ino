@@ -47,6 +47,7 @@ BLYNK_WRITE(V3) {
 
 void setup() {
   Serial.begin(9600);
+  Serial.println();
 
   Blynk.begin(auth, ssid, pass);
 }
