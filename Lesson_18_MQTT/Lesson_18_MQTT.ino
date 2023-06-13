@@ -8,8 +8,12 @@
 #define LED4    22
 #define DHTPIN  23
 
-const char ssid[] = "YourWiFiName";
-const char password[] = "YourWiFiPassword";
+#define WIFI_SSID             "Your_WiFi_SSID"
+#define WIFI_PASSWORD         "Your_WiFi_Password"
+#define MQTT_HOST             "MQTT_Broker_IP_or_DNS"
+#define MQTT_PREFIX_TOPIC     "Your_Phone_Number/"
+#define MQTT_PUBLISH_TOPIC    "monitor/"
+#define MQTT_SUBSCRIBE_TOPIC  "control/"
 
 WiFiClient net;
 MQTTClient mqtt;
@@ -18,69 +22,86 @@ SimpleDHT11 dht11(DHTPIN);
 
 unsigned long lastMillis = 0;
 
-void wifiConnect() {
-  Serial.print("Connecting to Wi-Fi '" + String(ssid) + "' ...");
-  
-  WiFi.begin(ssid, password);
+void connectToWiFiRouter() {
+  Serial.print("Connecting to Wi-Fi '" + String(WIFI_SSID) + "' ...");
 
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
-  Serial.println(" connected.");
+  
+  Serial.println(" connected!");
+}
 
-  mqtt.begin("mqtt.ariffinzulkifli.com", net);
-  Serial.print("Connecting to MQTT broker ...");
+void mqttConnectToBroker(){
+  Serial.print("Connecting to '" + String(WIFI_SSID) + "' ...");
+  
+  mqtt.begin(MQTT_HOST, net);
+  mqtt.onMessage(mqttMessageReceived);
 
-  while (!mqtt.connect("YourESP32ClientID ")) {
+  String uniqueString = String(WIFI_SSID) + "-" + String(random(1, 98)) + String(random(99, 999));
+  char uniqueClientID[uniqueString.length() + 1];
+  
+  uniqueString.toCharArray(uniqueClientID, uniqueString.length() + 1);
+  
+  while (!mqtt.connect(uniqueClientID)) {
     Serial.print(".");
     delay(500);
   }
 
-  Serial.println(" connected.");
+  Serial.println(" connected!");
+  
+  String SUBSCRIBE_TOPIC = String(MQTT_PREFIX_TOPIC) + String(MQTT_SUBSCRIBE_TOPIC);
 
-  mqtt.subscribe("YourESP32DeviceID/control/lamp1");
-  mqtt.subscribe("YourESP32DeviceID/control/lamp2");
-  mqtt.subscribe("YourESP32DeviceID/control/lamp3");
-  mqtt.subscribe("YourESP32DeviceID/control/lamp4");
-  mqtt.subscribe("YourESP32DeviceID/control/lampAll");
+  mqtt.subscribe(SUBSCRIBE_TOPIC + "lamp1");
+  mqtt.subscribe(SUBSCRIBE_TOPIC + "lamp2");
+  mqtt.subscribe(SUBSCRIBE_TOPIC + "lamp3");
+  mqtt.subscribe(SUBSCRIBE_TOPIC + "lamp4");
+  mqtt.subscribe(SUBSCRIBE_TOPIC + "lampAll");
+
 }
 
-void messageReceived(String &topic, String &payload) {
-  if(topic == "YourESP32DeviceID/control/lamp1"){
+void mqttMessageReceived(String &topic, String &payload) {
+
+  String SUBSCRIBE_TOPIC = String(MQTT_PREFIX_TOPIC) + String(MQTT_SUBSCRIBE_TOPIC);
+  String device = topic.substring(payload.indexOf(SUBSCRIBE_TOPIC) + 1);
+
+  if(device == "lamp1"){
     digitalWrite(LED1, payload.toInt());
   }
-
-  if(topic == "YourESP32DeviceID/control/lamp2"){
+  else if(device == "lamp2"){
     digitalWrite(LED2, payload.toInt());
   }
-
-  if(topic == "YourESP32DeviceID/control/lamp3"){
+  else if(device == "lamp3"){
     digitalWrite(LED3, payload.toInt());
   }
-
-  if(topic == "YourESP32DeviceID/control/lamp4"){
+  else if(device == "lamp4"){
     digitalWrite(LED4, payload.toInt());
   }
-
-  if(topic == "YourESP32DeviceID/control/lampAll"){
+  else if(device == "lampAll"){
     digitalWrite(LED1, payload.toInt());
     digitalWrite(LED2, payload.toInt());
     digitalWrite(LED3, payload.toInt());
     digitalWrite(LED4, payload.toInt());
 
     if(payload.toInt() == 1){
-      mqtt.publish("YourESP32DeviceID/control/lamp1", payload);
-      mqtt.publish("YourESP32DeviceID/control/lamp2", payload);
-      mqtt.publish("YourESP32DeviceID/control/lamp3", payload);
-      mqtt.publish("YourESP32DeviceID/control/lamp4", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp1", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp2", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp3", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp4", payload);
     }
     else{
-      mqtt.publish("YourESP32DeviceID/control/lamp1", payload);
-      mqtt.publish("YourESP32DeviceID/control/lamp2", payload);
-      mqtt.publish("YourESP32DeviceID/control/lamp3", payload);
-      mqtt.publish("YourESP32DeviceID/control/lamp4", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp1", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp2", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp3", payload);
+      mqtt.publish(SUBSCRIBE_TOPIC + "lamp4", payload);
     }
+  }
+  else{
+
   }
 }
 
@@ -93,29 +114,44 @@ void setup() {
   pinMode(LED3, OUTPUT);
   pinMode(LED4, OUTPUT);
 
-  wifiConnect();
-  mqtt.onMessage(messageReceived);
+  connectToWiFiRouter();
+  mqttConnectToBroker();
+
+  Serial.println();
 
 }
 
 void loop() {
   mqtt.loop();
-  delay(10);  // <- fixes some issues with Wi-Fi stability
+  delay(10);  // <- fixes some issues with WiFi stability
 
-  if (!mqtt.connected()) {
-    wifiConnect();
+  if (WiFi.status() != WL_CONNECTED) {
+    connectToWiFiRouter();
   }
 
-  byte t, h;
+  if (!mqtt.connected()) {
+    mqttConnectToBroker();
+  }
+
+  byte temperature, humidity;
   
-  if ((dht11.read(&t, &h, NULL)) != SimpleDHTErrSuccess) {
+  if ((dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
+    Serial.print("#");
     return;
   }
 
+  Serial.println("Temperature: " + String(temperature) + " °C");
+  Serial.println("Humidity: " + String(humidity) + " %RH");
+
   if (millis() - lastMillis > 10000) {
     lastMillis = millis();
+
+    String PUBLISH_TOPIC = String(MQTT_PREFIX_TOPIC) + String(MQTT_PUBLISH_TOPIC);
+
+    Serial.println("Publish Topic: " + PUBLISH_TOPIC + "temperature -> Value: " + String(temperature));
+    Serial.println("Publish Topic: " + PUBLISH_TOPIC + "humidity -> Value: " + String(humidity));
     
-    mqtt.publish("YourESP32DeviceID/data/temperature", String(t));
-    mqtt.publish("YourESP32DeviceID/data/humidity", String(h));
+    mqtt.publish(PUBLISH_TOPIC + "temperature", String(temperature));
+    mqtt.publish(PUBLISH_TOPIC + "humidity", String(humidity));
   }
 }
