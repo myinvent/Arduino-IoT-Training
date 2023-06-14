@@ -19,7 +19,7 @@ char pass[] = "YOUR_WIFI_PASSWORD";
 #define LED4    22
 #define DHTPIN  23
 
-SimpleDHT11 dht11(pinDHT11);
+SimpleDHT11 dht11(DHTPIN);
 
 unsigned long lastMillis = 0;
 
