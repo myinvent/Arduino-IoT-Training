@@ -128,7 +128,7 @@ void loop() {
   byte temperature, humidity;
   
   if ((dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
-    Serial.print("#");
+    Serial.print(".");
     return;
   }
   Serial.println();
