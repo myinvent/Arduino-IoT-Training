@@ -67,7 +67,7 @@ void mqttConnectToBroker(){
 void mqttMessageReceived(String &topic, String &payload) {
 
   String SUBSCRIBE_TOPIC = String(MQTT_PREFIX_TOPIC) + String(MQTT_SUBSCRIBE_TOPIC);
-  String device = topic.substring("control" + 8);
+  String device = topic.substring(topic.indexOf("control") + 8);
 
   if(device == "lamp1"){
     digitalWrite(LED1, payload.toInt());
@@ -131,6 +131,7 @@ void loop() {
     Serial.print("#");
     return;
   }
+  Serial.println();
 
   Serial.println("Temperature: " + String(temperature) + " °C");
   Serial.println("Humidity: " + String(humidity) + " %RH");
