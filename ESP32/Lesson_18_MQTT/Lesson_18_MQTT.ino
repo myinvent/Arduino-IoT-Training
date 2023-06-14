@@ -67,7 +67,7 @@ void mqttConnectToBroker(){
 void mqttMessageReceived(String &topic, String &payload) {
 
   String SUBSCRIBE_TOPIC = String(MQTT_PREFIX_TOPIC) + String(MQTT_SUBSCRIBE_TOPIC);
-  String device = topic.substring(payload.indexOf(SUBSCRIBE_TOPIC) + 1);
+  String device = topic.substring("control" + 8);
 
   if(device == "lamp1"){
     digitalWrite(LED1, payload.toInt());
