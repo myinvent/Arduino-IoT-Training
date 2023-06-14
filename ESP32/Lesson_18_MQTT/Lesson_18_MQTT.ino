@@ -87,18 +87,10 @@ void mqttMessageReceived(String &topic, String &payload) {
     digitalWrite(LED3, payload.toInt());
     digitalWrite(LED4, payload.toInt());
 
-    if(payload.toInt() == 1){
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp1", payload);
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp2", payload);
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp3", payload);
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp4", payload);
-    }
-    else{
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp1", payload);
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp2", payload);
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp3", payload);
-      mqtt.publish(SUBSCRIBE_TOPIC + "lamp4", payload);
-    }
+    mqtt.publish(SUBSCRIBE_TOPIC + "lamp1", payload);
+    mqtt.publish(SUBSCRIBE_TOPIC + "lamp2", payload);
+    mqtt.publish(SUBSCRIBE_TOPIC + "lamp3", payload);
+    mqtt.publish(SUBSCRIBE_TOPIC + "lamp4", payload);
   }
   else{
 
