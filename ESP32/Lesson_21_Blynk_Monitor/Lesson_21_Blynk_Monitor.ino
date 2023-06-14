@@ -59,9 +59,10 @@ void loop() {
   int err = SimpleDHTErrSuccess;
   
   if ((err = dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
-    Serial.print("#");
+    Serial.print(".");
     return;
   }
+  Serial.println();
   
   Serial.println("Temperature: " + String(temperature) + " °C");
   Serial.println("Humidity: " + String(humidity) + " %RH");
